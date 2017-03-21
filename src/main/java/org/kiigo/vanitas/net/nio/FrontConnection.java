@@ -28,7 +28,7 @@ public class FrontConnection implements Closeable ,IOConnection{
 	 */
 	private SelectionKey selectionKey;
 
-	private IoHander ioHander = new NIoHander();
+	private IoHander ioHander = new EchoIoHander();
 
 	public SelectionKey getSelectionKey() {
 		return selectionKey;
@@ -58,10 +58,12 @@ public class FrontConnection implements Closeable ,IOConnection{
 		}
 		int lenth = channel.read(readBuffer);
 		if (lenth <= 0) {
+			readBuffer.clear();
 			return;
 		}
 		ByteBuffer bf = ByteBuffer.wrap(readBuffer.array());
 		readBuffer.clear();
+		
 		VanitasServer.getExecutor().execute(() -> {
 			ioHander.hander(bf,lenth,this);
 		});

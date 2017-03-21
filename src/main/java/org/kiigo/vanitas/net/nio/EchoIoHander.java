@@ -2,7 +2,7 @@ package org.kiigo.vanitas.net.nio;
 
 import java.nio.ByteBuffer;
 
-public  class NIoHander implements IoHander{
+public  class EchoIoHander implements IoHander{
 
 	@Override
 	public void hander(ByteBuffer bf,int length ,FrontConnection source) {
@@ -10,9 +10,9 @@ public  class NIoHander implements IoHander{
 		try {
 		
 			System.out.println("收到数据包"+bf);
-			source.write("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq".getBytes());
+			
+			source.write(bf.array());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}
