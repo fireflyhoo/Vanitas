@@ -2,7 +2,6 @@ package org.kiigo.vanitas.net.nio;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -11,7 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.kiigo.vanitas.VanitasServer;
 
-public class FrontConnection implements Closeable {
+public class FrontConnection implements Closeable ,IOConnection{
 	private Queue<ByteBuffer> writeQueue = new ConcurrentLinkedQueue<ByteBuffer>();
 
 	/**
@@ -64,17 +63,19 @@ public class FrontConnection implements Closeable {
 		ByteBuffer bf = ByteBuffer.wrap(readBuffer.array());
 		readBuffer.clear();
 		VanitasServer.getExecutor().execute(() -> {
-			ioHander.hander(bf,lenth);
+			ioHander.hander(bf,lenth,this);
 		});
 
 	}
 
 	public void write(ByteBuffer buffer) {
 		writeQueue.offer(buffer);
+		selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
 	}
 
 	public void write(byte... bs) {
 		writeQueue.offer(ByteBuffer.wrap(bs));
+		selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
 	}
 
 	public void close() throws IOException {
@@ -89,6 +90,14 @@ public class FrontConnection implements Closeable {
 			writeQueue.clear();
 			writeQueue = null;
 		}
+	}
+
+	@Override
+	public void write0() throws Throwable {
+		ByteBuffer v =null;;
+		while ((v  = writeQueue.poll()) !=null) {
+			while(0 < channel.write(v));
+		}		
 	}
 
 }

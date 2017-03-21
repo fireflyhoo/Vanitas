@@ -1,5 +1,6 @@
 package org.kiigo.vanitas.net.nio;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -126,7 +127,7 @@ public class NIOReactor implements SocketIOReactor {
 				byte[] bytes = new byte[n];
 				dst.flip();
 				dst.get(bytes, 0, n);
-				System.err.println("读到数据啦:" + new String(bytes));
+				System.err.println("读到数据啦:" + new String(bytes));				
 			}
 		} catch (Exception e) {
 			LOGGER.error("读取数据出错", e);
@@ -162,6 +163,22 @@ public class NIOReactor implements SocketIOReactor {
 	}
 
 	public void doWrit(SelectionKey key) {
+		Object attachment  = key.attachment();
+		if(attachment instanceof IOConnection){
+			try {
+				((IOConnection) attachment).write0();
+			} catch (Throwable e) {
+				LOGGER.error("写入数据出现错误,关闭连接",e);
+				if(attachment instanceof Closeable){
+					try {
+						((Closeable) attachment).close();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			}
+		}
 		if ((key.interestOps() & SelectionKey.OP_WRITE) != 0) {
 			key.interestOps(key.interestOps() & (~SelectionKey.OP_WRITE));
 		}

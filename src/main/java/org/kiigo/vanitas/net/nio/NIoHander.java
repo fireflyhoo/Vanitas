@@ -1,25 +1,20 @@
 package org.kiigo.vanitas.net.nio;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.List;
-
-import io.mycat.backend.postgresql.packet.PostgreSQLPacket;
-import io.mycat.backend.postgresql.utils.PacketUtils;
 
 public  class NIoHander implements IoHander{
 
 	@Override
-	public void hander(ByteBuffer bf,int length) {
+	public void hander(ByteBuffer bf,int length ,FrontConnection source) {
 		//读取数据
 		try {
-			List<PostgreSQLPacket> bj = PacketUtils.parseClientPacket(bf, 0, length);			
-			System.out.println(bj); 
+		
+			System.out.println("收到数据包"+bf);
+			source.write("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq".getBytes());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
+		}		
 	}
 
 }
