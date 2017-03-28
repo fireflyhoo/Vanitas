@@ -11,4 +11,11 @@ public interface IOConnection {
 	 * @throws Throwable 
 	 */
 	void write0() throws Throwable;
+	
+	
+	/***
+	 * 异步读取数据
+	 * @throws Throwable
+	 */
+	public void asynchronousRead() throws Throwable; 
 } 

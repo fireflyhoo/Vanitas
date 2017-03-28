@@ -68,7 +68,8 @@ public class NIOReactor implements SocketIOReactor {
 						SelectionKey key = keysIter.next();
 						Object conn = key.attachment();
 						try {
-							if (key.isValid() && key.isReadable()) {								
+							if (key.isValid() && key.isReadable()) {
+								System.out.println("有读事件..."); 
 								doRead(key);
 							}
 							if (key.isValid() && key.isWritable()) {
@@ -146,8 +147,7 @@ public class NIOReactor implements SocketIOReactor {
 			try {
 				SocketChannel chan = con.getChannel();
 				chan.configureBlocking(false);
-				SelectionKey selectionKey = chan.register(rwSelector, SelectionKey.OP_READ | SelectionKey.OP_WRITE,
-						con);// 默认是可读可写的
+				SelectionKey selectionKey = chan.register(rwSelector, SelectionKey.OP_READ,con);// 默认是可读
 				con.setSelectionKey(selectionKey);
 				con = registerQueue.poll();
 			} catch (Throwable e) {
@@ -163,10 +163,15 @@ public class NIOReactor implements SocketIOReactor {
 	}
 
 	public void doWrit(SelectionKey key) {
+		System.err.println("进行写处理......"); 
 		Object attachment  = key.attachment();
 		if(attachment instanceof IOConnection){
 			try {
 				((IOConnection) attachment).write0();
+				System.err.println("进行写处理完成......"); 
+				if ((key.interestOps() & SelectionKey.OP_WRITE) != 0) {					
+					key.interestOps(key.interestOps() & (~SelectionKey.OP_WRITE));
+				}
 			} catch (Throwable e) {
 				LOGGER.error("写入数据出现错误,关闭连接",e);
 				if(attachment instanceof Closeable){
@@ -179,9 +184,7 @@ public class NIOReactor implements SocketIOReactor {
 				}
 			}
 		}
-		if ((key.interestOps() & SelectionKey.OP_WRITE) != 0) {
-			key.interestOps(key.interestOps() & (~SelectionKey.OP_WRITE));
-		}
+		
 	}
 
 	public void register(FrontConnection con) {

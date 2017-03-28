@@ -10,8 +10,7 @@ public  class EchoIoHander implements IoHander{
 		try {
 		
 			System.out.println("收到数据包"+bf);
-			
-			source.write(bf.array());
+			source.write(bf);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}		

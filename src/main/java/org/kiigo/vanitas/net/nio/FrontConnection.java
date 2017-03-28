@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.kiigo.vanitas.VanitasServer;
 
-public class FrontConnection implements Closeable ,IOConnection{
+public class FrontConnection implements Closeable, IOConnection {
 	private Queue<ByteBuffer> writeQueue = new ConcurrentLinkedQueue<ByteBuffer>();
 
 	/**
@@ -54,30 +54,40 @@ public class FrontConnection implements Closeable ,IOConnection{
 	public void asynchronousRead() throws Throwable {
 		if (readBuffer == null) {
 			readBuffer = ByteBuffer.allocate(1024 * 1024 * 2);// 默认读取 2MB 数据
-
 		}
-		int lenth = channel.read(readBuffer);
-		if (lenth <= 0) {
-			readBuffer.clear();
-			return;
-		}
-		ByteBuffer bf = ByteBuffer.wrap(readBuffer.array());
-		readBuffer.clear();
+		int length = this.channel.read(readBuffer);
+		int position = readBuffer.position();
 		
+		readBuffer.flip();
+		byte[] dst = new byte[length];
+		readBuffer.get(dst, position-length, length);
+//		System.out.println("读到数据长度:" + dst.length);
+		readBuffer.clear();
 		VanitasServer.getExecutor().execute(() -> {
-			ioHander.hander(bf,lenth,this);
+			ioHander.hander(ByteBuffer.wrap(dst), 0, this);
 		});
-
 	}
 
 	public void write(ByteBuffer buffer) {
 		writeQueue.offer(buffer);
-		selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
+		this.doWakeupIoSelector();
+	}
+
+	/**
+	 * 通知select 当前有 写入事件
+	 */
+	private void doWakeupIoSelector() {
+		if ((selectionKey.interestOps() & SelectionKey.OP_WRITE) > 0) {
+			System.err.print("当前的状态就是可写状态");
+		} else {
+			selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
+		}
+		selectionKey.selector().wakeup();// 写入数据要立刻唤醒.
 	}
 
 	public void write(byte... bs) {
 		writeQueue.offer(ByteBuffer.wrap(bs));
-		selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
+		this.doWakeupIoSelector();
 	}
 
 	public void close() throws IOException {
@@ -96,10 +106,11 @@ public class FrontConnection implements Closeable ,IOConnection{
 
 	@Override
 	public void write0() throws Throwable {
-		ByteBuffer v =null;;
-		while ((v  = writeQueue.poll()) !=null) {
-			while(0 < channel.write(v));
-		}		
+		ByteBuffer v = null;
+		while ((v = writeQueue.poll()) != null) {
+			while (0 < channel.write(v))
+				;
+		}
 	}
 
 }
