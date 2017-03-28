@@ -4,6 +4,19 @@ import java.nio.ByteBuffer;
 
 import io.mycat.backend.postgresql.utils.PIOUtils;
 
+/*******
+ * 
+ * ParseComplete (B)
+ *   Byte1('1')
+ *       标识这条消息是一个 Parse 完成指示器。
+ *   Int32(4)
+ *       以字节记的消息内容长度，包括长度自身。
+ *       
+ *        编译完成数据库包 
+ *        
+ * @author Huyahui
+ *
+ */
 public class ParseComplete extends PostgreSQLPacket {
 	private char marker = PacketMarker.B_ParseComplete.getValue();
 	private int length ;
@@ -28,4 +41,11 @@ public class ParseComplete extends PostgreSQLPacket {
 		return parse;
 	}
 
+	@Override
+	public ByteBuffer writeBuffer() {
+		ByteBuffer buf  = ByteBuffer.allocate(5);
+		PIOUtils.SendChar(this.getMarker(), buf);
+		PIOUtils.SendInteger4(4, buf);
+		return buf;
+	}
 }

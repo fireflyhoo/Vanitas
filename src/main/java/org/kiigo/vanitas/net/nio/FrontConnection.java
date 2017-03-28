@@ -28,7 +28,7 @@ public class FrontConnection implements Closeable, IOConnection {
 	 */
 	private SelectionKey selectionKey;
 
-	private IoHander ioHander = new EchoIoHander();
+	private IoHander ioHander = new PostgresqlServerHander();
 
 	public SelectionKey getSelectionKey() {
 		return selectionKey;
@@ -44,6 +44,9 @@ public class FrontConnection implements Closeable, IOConnection {
 
 	public FrontConnection(SocketChannel channel) {
 		this.channel = channel;
+		VanitasServer.getExecutor().execute(() ->{
+			ioHander.onConnected(channel);
+		});
 	}
 
 	/***
@@ -69,7 +72,7 @@ public class FrontConnection implements Closeable, IOConnection {
 	}
 
 	public void write(ByteBuffer buffer) {
-		writeQueue.offer(buffer);
+		writeQueue.add(buffer);
 		this.doWakeupIoSelector();
 	}
 
@@ -77,16 +80,18 @@ public class FrontConnection implements Closeable, IOConnection {
 	 * 通知select 当前有 写入事件
 	 */
 	private void doWakeupIoSelector() {
+		System.out.println("唤醒...///////////////");
 		if ((selectionKey.interestOps() & SelectionKey.OP_WRITE) > 0) {
 			System.err.print("当前的状态就是可写状态");
 		} else {
 			selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
-		}
+		} 
+		
 		selectionKey.selector().wakeup();// 写入数据要立刻唤醒.
 	}
 
 	public void write(byte... bs) {
-		writeQueue.offer(ByteBuffer.wrap(bs));
+		writeQueue.add(ByteBuffer.wrap(bs));
 		this.doWakeupIoSelector();
 	}
 

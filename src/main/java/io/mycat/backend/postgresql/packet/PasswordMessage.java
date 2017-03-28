@@ -25,9 +25,22 @@ public class PasswordMessage extends PostgreSQLPacket {
 		}
 	}
 
+	public PasswordMessage() {
+	}
+	
 	private char marker = PacketMarker.F_PwdMess.getValue();
 
 	private byte[] password;
+
+	public byte[] getPassword() {
+		return password;
+	}
+
+	public void setPassword(byte[] password) {
+		this.password = password;
+	}
+	
+	
 
 	@Override
 	public int getLength() {

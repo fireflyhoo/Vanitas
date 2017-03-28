@@ -9,6 +9,7 @@ import java.util.TimeZone;
 
 import io.mycat.backend.postgresql.packet.AuthenticationPacket;
 import io.mycat.backend.postgresql.packet.BackendKeyData;
+import io.mycat.backend.postgresql.packet.Bind;
 import io.mycat.backend.postgresql.packet.CommandComplete;
 import io.mycat.backend.postgresql.packet.CopyInResponse;
 import io.mycat.backend.postgresql.packet.CopyOutResponse;
@@ -17,49 +18,188 @@ import io.mycat.backend.postgresql.packet.EmptyQueryResponse;
 import io.mycat.backend.postgresql.packet.ErrorResponse;
 import io.mycat.backend.postgresql.packet.NoticeResponse;
 import io.mycat.backend.postgresql.packet.ParameterStatus;
+import io.mycat.backend.postgresql.packet.Parse;
 import io.mycat.backend.postgresql.packet.ParseComplete;
+import io.mycat.backend.postgresql.packet.PasswordMessage;
 import io.mycat.backend.postgresql.packet.PostgreSQLPacket;
+import io.mycat.backend.postgresql.packet.PostgreSQLPacket.DataProtocol;
+import io.mycat.backend.postgresql.packet.PostgreSQLPacket.DateType;
 import io.mycat.backend.postgresql.packet.ReadyForQuery;
 import io.mycat.backend.postgresql.packet.RowDescription;
 import io.mycat.backend.postgresql.packet.StartupMessage;
+import io.mycat.backend.postgresql.packet.Bind.DataParameter;
+import io.mycat.backend.postgresql.packet.StartupMessage.ParamsItme;
 
 public class PacketUtils {
 
-	public static List<PostgreSQLPacket> parseClientPacket(ByteBuffer buffer, int offset, int readLength) throws Exception {
-		char _MAKE = buffer.getChar(offset);
+	public static List<PostgreSQLPacket> parseClientPacket(ByteBuffer buffer, int offset, int readLength)
+			throws Exception {
+		ArrayList<PostgreSQLPacket> pgs = new ArrayList<>();
+		char _MAKE = (char) buffer.get(offset);
 		switch (_MAKE) {
 		case 'C':
+			break;
 
+		case 'p':
+			pgs.add(paersPasswordMessage(buffer, offset, readLength));
+			break;
+
+		case 'P':
+			pgs.addAll(paersParsePkg(buffer, offset, readLength));
 			break;
 
 		default:
-			paersStartUp(buffer,offset ,readLength);
+			pgs.add(paersStartUp(buffer, offset, readLength));
 			break;
 		}
 
-		return null;
+		return pgs;
 	}
 
-	
-	
-	private static void paersStartUp(ByteBuffer buffer, int offset, int readLength) throws Exception {
-		 int length = PIOUtils.redInteger4(buffer, offset);	//包长度
-		 
-		 short protocol_major = PIOUtils.redInteger2(buffer, offset + 4);
-		 short protocol_minor = PIOUtils.redInteger2(buffer, offset + 4 + 2);
-		 int _offset = offset+ 4 + 2+2;
-		 List<String> params = new ArrayList<>();
-		 while(_offset < (offset + length)){
-			 String  param  =  PIOUtils.redString(buffer,_offset, Charset.forName("utf-8"));
-			 _offset =_offset + (param.getBytes().length +1); // 由于 pgsql 字符串会在后面补一个  '\0'作分割符号他的长度是实际长度 +1；
-			 if(param != null){
-				 params.add(param);
-			 }
-		 }
-		 
-		 StartupMessage message = new StartupMessage();
-		 
-		 
+	/****************
+	 * 解析编译sql包
+	 * 
+	 * @param buffer
+	 * @param offset
+	 * @param readLength
+	 * @return
+	 * @throws IOException
+	 */
+	private static List<PostgreSQLPacket> paersParsePkg(ByteBuffer buffer, int offset, int readLength)
+			throws IOException {
+
+		List<PostgreSQLPacket> pgs = new ArrayList<>();
+
+		char mark = PIOUtils.redChar1(buffer, offset);
+		int length = PIOUtils.redInteger4(buffer, offset + 1);
+		String name = PIOUtils.redString(buffer, offset + 1 + 4, Charset.forName("utf-8"));
+		String sql = PIOUtils.redString(buffer, offset + 1 + 4 + name.getBytes().length + 1, Charset.forName("utf-8"));
+
+		int parmTypesLength = PIOUtils.redInteger2(buffer,
+				offset + 1 + 4 + name.getBytes().length + 1 + sql.getBytes().length + 1);
+
+		List<DateType> paramTypes = new ArrayList<>();
+
+		int _offset = offset + 1 + 4 + name.getBytes().length + 1 + sql.getBytes().length + 1 + 2;
+		for (int i = 0; i < parmTypesLength; i++) {
+			paramTypes.add(DateType.valueOf(PIOUtils.redInteger4(buffer, _offset)));
+			_offset = _offset + 4;
+		}
+
+		Parse parse = new Parse();
+		parse.setName(name);
+		parse.setParameterNumber((short) parmTypesLength);
+		parse.setParameterTypes(paramTypes.toArray(new DateType[parmTypesLength]));
+		parse.setSql(sql);
+		pgs.add(parse);
+
+		int leg = parse.getLength();
+		char make = PIOUtils.redChar1(buffer, offset + (leg + 1));
+		_offset = offset + leg + 1;
+		if (make == 'B') {// 绑定包
+			Charset utf8 = Charset.forName("utf-8");
+
+			Bind bind = new Bind();
+			length = PIOUtils.redInteger4(buffer, _offset + 1);
+			String _name = PIOUtils.redString(buffer, _offset + 1 + 4, utf8);
+			_offset = _offset + 1 + 4 + _name.getBytes().length + 1;
+			String _sql = PIOUtils.redString(buffer, _offset, utf8);
+			_offset = offset + _sql.getBytes().length + 1;
+			short parameterProtocolNumber = PIOUtils.redInteger2(buffer, _offset);
+			_offset = offset + 2;
+			DataProtocol[] parameterProtocol = new DataProtocol[parameterProtocolNumber];
+			for (int i = 0; i < parameterProtocolNumber; i++) {
+				parameterProtocol[i] = DataProtocol.valueOf(PIOUtils.redInteger2(buffer, _offset));
+				_offset += 2;
+			}
+
+			short parameterNumber = PIOUtils.redInteger2(buffer, _offset);
+			DataParameter[] parameter = new DataParameter[parameterNumber];
+			for (int i = 0; i < parameterNumber; i++) {
+				parameter[i] = new DataParameter();
+				parameter[i].setLength(PIOUtils.redInteger4(buffer, _offset));
+				if (parameter[i].getLength() != -1) {
+					parameter[i].setData(PIOUtils.redByteArray(buffer, _offset + 4, parameter[i].getLength()));
+					_offset += (parameter[i].getLength() + 4);
+				} else {
+					offset += 4;
+					parameter[i].setNull(true);
+				}
+			}
+			short resultNumber = PIOUtils.redInteger2(buffer, _offset);
+			_offset += 2;
+			DataProtocol[] resultProtocol = new DataProtocol[resultNumber];
+			for (int i = 0; i < resultNumber; i++) {
+				resultProtocol[i] = DataProtocol.valueOf(PIOUtils.redInteger2(buffer, _offset));
+				_offset += 2;
+			}
+			bind.setName(_name);
+			bind.setSql(_sql);
+			bind.setParameter(parameter);
+			bind.setParameterNumber(parameterNumber);
+			bind.setParameterProtocol(parameterProtocol);
+			bind.setParameterProtocolNumber(parameterProtocolNumber);
+			bind.setResultNumber(resultNumber);
+			bind.setResultProtocol(resultProtocol);
+			pgs.add(bind);
+
+		}
+		return pgs;
+	}
+
+	/**
+	 * 解析密码包
+	 * 
+	 * @param buffer
+	 * @param offset
+	 * @param readLength
+	 * @return
+	 */
+	private static PasswordMessage paersPasswordMessage(ByteBuffer buffer, int offset, int readLength) {
+		PasswordMessage password = new PasswordMessage();
+		char mark = PIOUtils.redChar1(buffer, offset);
+		int length = PIOUtils.redInteger4(buffer, offset + 1);
+		byte[] pass = PIOUtils.redByteArray(buffer, offset + 1 + 4, length - 4);
+		password.setPassword(pass);
+		return password;
+	}
+
+	/*************
+	 * 解析 客户段发来的 启动包
+	 * 
+	 * @param buffer
+	 * @param offset
+	 * @param readLength
+	 * @return
+	 * @throws Exception
+	 */
+	private static StartupMessage paersStartUp(ByteBuffer buffer, int offset, int readLength) throws Exception {
+		int length = PIOUtils.redInteger4(buffer, offset); // 包长度
+		short protocol_major = PIOUtils.redInteger2(buffer, offset + 4);
+		short protocol_minor = PIOUtils.redInteger2(buffer, offset + 4 + 2);
+		int _offset = offset + 4 + 2 + 2;
+		List<String> params = new ArrayList<>();
+		while (_offset < (offset + length)) {
+			String param = PIOUtils.redString(buffer, _offset, Charset.forName("utf-8"));
+			_offset = _offset + (param.getBytes().length + 1);
+			if (param != null) {
+				params.add(param);
+			}
+		}
+		StartupMessage message = new StartupMessage();
+		message.setMajor(protocol_major);
+		message.setMinor(protocol_minor);
+		List<ParamsItme> paramsItmes = new ArrayList<>();
+		ParamsItme item = null;
+		for (int i = 0; i < params.size(); i++) {
+			if (i % 2 == 0 && (i + 1 < params.size())) {
+
+				item = new ParamsItme(params.get(i), params.get(i + 1));
+				paramsItmes.add(item);
+			}
+		}
+		message.setParams(paramsItmes);
+		return message;
 	}
 
 	public static List<PostgreSQLPacket> parsePacket(ByteBuffer buffer, int offset, int readLength) throws IOException {

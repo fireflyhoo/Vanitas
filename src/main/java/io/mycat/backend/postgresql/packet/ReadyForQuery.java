@@ -1,6 +1,9 @@
 package io.mycat.backend.postgresql.packet;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
+
+import io.mycat.backend.postgresql.utils.PIOUtils;
 
 /***
  * 等待查询包
@@ -50,6 +53,23 @@ public class ReadyForQuery extends PostgreSQLPacket {
 		readyForQuery.state = TransactionState.valueOf((char)buffer.get(offset+1+4));
 		return readyForQuery;
 	}
+	
+	
+	
+
+	@Override
+	public ByteBuffer writeBuffer() {
+		int length = 4 + 1 + 1;
+		ByteBuffer buffer = ByteBuffer.allocate(length);
+		PIOUtils.SendChar(this.getMarker(), buffer);
+		PIOUtils.SendInteger4(5, buffer);
+		PIOUtils.SendChar(TransactionState.NOT_IN.vlaue, buffer);
+		buffer.flip();
+		return buffer;
+	}
+
+
+
 
 	/***
 	 * 后端事物状态

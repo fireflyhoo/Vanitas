@@ -99,6 +99,40 @@ public class Bind extends PostgreSQLPacket {
 
 	}
 
+	
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setSql(String sql) {
+		this.sql = sql;
+	}
+
+	public void setParameterProtocolNumber(short parameterProtocolNumber) {
+		this.parameterProtocolNumber = parameterProtocolNumber;
+	}
+
+	public void setParameterProtocol(DataProtocol[] parameterProtocol) {
+		this.parameterProtocol = parameterProtocol;
+	}
+
+	public void setParameterNumber(short parameterNumber) {
+		this.parameterNumber = parameterNumber;
+	}
+
+	public void setParameter(DataParameter[] parameter) {
+		this.parameter = parameter;
+	}
+
+	public void setResultNumber(short resultNumber) {
+		this.resultNumber = resultNumber;
+	}
+
+	public void setResultProtocol(DataProtocol[] resultProtocol) {
+		this.resultProtocol = resultProtocol;
+	}
+
 	private char marker;
 	private int length;
 	private String name;

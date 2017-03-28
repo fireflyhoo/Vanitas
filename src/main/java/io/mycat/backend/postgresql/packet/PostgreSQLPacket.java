@@ -1,5 +1,6 @@
 package io.mycat.backend.postgresql.packet;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 public abstract class PostgreSQLPacket {
@@ -19,6 +20,15 @@ public abstract class PostgreSQLPacket {
 	 * @return
 	 */
 	public abstract char getMarker();
+	
+	
+	/**
+	 * 构造一个buffe 数组
+	 * @return
+	 */
+	public  ByteBuffer writeBuffer() {
+		throw new UnsupportedOperationException("还未实现本方法"); 
+	}
 	
 	
 	public int getPacketSize(){
@@ -260,7 +270,12 @@ public abstract class PostgreSQLPacket {
 		/***
 		 * 绑定参数成功
 		 */
-		B_BindComplete('2');
+		B_BindComplete('2'),
+		
+		/**
+		 * 前端同步命令 
+		 */
+		F_Sync('S');
 
 		private char value;
 

@@ -25,6 +25,18 @@ import io.mycat.backend.postgresql.utils.PIOUtils;
 //		对于 FETCH 命令，标记是 FETCH rows，这里的 rows 是从游标中检索出来的行数。
 public class CommandComplete extends PostgreSQLPacket {
 
+	@Override
+	public ByteBuffer writeBuffer() {
+		 int _length = commandResponse.getBytes().length +1 + 4;
+		ByteBuffer bf =ByteBuffer.allocate(_length +1);
+		PIOUtils.SendChar(getMarker(),bf);
+		PIOUtils.SendInteger4(_length, bf);
+		PIOUtils.SendString(commandResponse, bf);
+		bf.put((byte)'\0');
+		bf.flip();
+		return bf;
+	}
+
 	private int length;
 
 	/**
@@ -33,6 +45,10 @@ public class CommandComplete extends PostgreSQLPacket {
 	private String commandResponse;
 
 	// 存储状态。
+
+	public void setCommandResponse(String commandResponse) {
+		this.commandResponse = commandResponse;
+	}
 
 	public int getAffectedRows() {
 		return affectedRows;

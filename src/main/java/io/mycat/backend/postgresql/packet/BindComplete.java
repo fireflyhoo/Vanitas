@@ -18,6 +18,15 @@ import io.mycat.backend.postgresql.utils.PIOUtils;
  *
  */
 public class BindComplete extends PostgreSQLPacket {
+	@Override
+	public ByteBuffer writeBuffer() {
+		ByteBuffer buf = ByteBuffer.allocate(5);
+		buf.put((byte) getMarker());
+		buf.putInt(4);
+		buf.flip();
+		return buf;
+	}
+
 	private char marker = PacketMarker.B_BindComplete.getValue();
 	private int length;
 

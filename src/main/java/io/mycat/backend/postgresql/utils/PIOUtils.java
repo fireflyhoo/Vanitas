@@ -45,6 +45,10 @@ public class PIOUtils {
 	public static short redInteger2(ByteBuffer buffer, int offset) {
 		return buffer.getShort(offset);
 	}
+	
+	public static char redChar1(ByteBuffer buffer,int offset){
+		return (char) buffer.get(offset);
+	}
 
 	/**
 	 * Sends a 2-byte integer (short) to the back end

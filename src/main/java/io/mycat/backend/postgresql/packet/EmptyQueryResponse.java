@@ -31,6 +31,16 @@ public class EmptyQueryResponse extends PostgreSQLPacket {
 	public char getMarker() {
 		return marker;
 	}
+	
+	@Override
+	public ByteBuffer writeBuffer() {
+		ByteBuffer buf = ByteBuffer.allocate(5);
+		buf.put((byte)marker);
+		buf.putInt(4);
+		buf.flip();
+		return buf;		
+	}
+	
 
 	public static EmptyQueryResponse parse(ByteBuffer buffer, int offset) {
 		if (buffer.get(offset) != PacketMarker.B_EmptyQueryResponse.getValue()) {
@@ -42,5 +52,8 @@ public class EmptyQueryResponse extends PostgreSQLPacket {
 		pack.length = PIOUtils.redInteger4(buffer, _offset);
 		return pack;
 	}
+
+	
+	
 
 }

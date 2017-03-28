@@ -38,19 +38,11 @@ public class Parse extends PostgreSQLPacket {
 	private char marker = PacketMarker.F_Parse.getValue();
 	// private int length;
 	private String name;
-	private String sql;
 	private short parameterNumber;
 	private DateType[] parameterTypes;
+	private String sql;
 
-	@Override
-	public int getLength() {
-		return 4 + name.getBytes(UTF8).length + sql.getBytes(UTF8).length + 2 + 4
-				* parameterNumber; //参数为空时仍然需要多个类型为0的int
-	}
-
-	@Override
-	public char getMarker() {
-		return marker;
+	public Parse() {
 	}
 
 	public Parse(String name, String sql, DateType... parameterTypes) {
@@ -59,6 +51,49 @@ public class Parse extends PostgreSQLPacket {
 		this.parameterNumber = (short) parameterTypes.length;
 		this.parameterTypes = parameterTypes;
 
+	}
+
+	@Override
+	public int getLength() {
+		return 4 + name.getBytes(UTF8).length +1+ sql.getBytes(UTF8).length+1  + 2 + 4
+				* parameterNumber; //参数为空时仍然需要多个类型为0的int
+	}
+
+	@Override
+	public char getMarker() {
+		return marker;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public short getParameterNumber() {
+		return parameterNumber;
+	}
+
+	public DateType[] getParameterTypes() {
+		return parameterTypes;
+	}
+
+	public String getSql() {
+		return sql;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setParameterNumber(short parameterNumber) {
+		this.parameterNumber = parameterNumber;
+	}
+
+	public void setParameterTypes(DateType[] parameterTypes) {
+		this.parameterTypes = parameterTypes;
+	}
+	
+	public void setSql(String sql) {
+		this.sql = sql;
 	}
 
 	public void write(ByteBuffer buffer) throws IOException {

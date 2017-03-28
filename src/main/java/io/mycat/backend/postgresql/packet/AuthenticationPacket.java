@@ -55,6 +55,12 @@ public class AuthenticationPacket extends PostgreSQLPacket {
 	private byte[] salt;
 
 	private AuthType authType;
+	
+	
+
+	public void setAuthType(AuthType authType) {
+		this.authType = authType;
+	}
 
 	public AuthType getAuthType() {
 		return authType;
@@ -90,4 +96,20 @@ public class AuthenticationPacket extends PostgreSQLPacket {
 		}
 		return packet;
 	}
+
+	@Override
+	public ByteBuffer writeBuffer() {
+		int length = 1 + 4 + 4 + ((this.authType == AuthType.MD5Password) ? 4 :0);
+		ByteBuffer bf = ByteBuffer.allocate(length);
+		bf.put((byte)this.marker);
+		PIOUtils.SendInteger4(length, bf);
+		PIOUtils.SendInteger4(this.authType.value, bf);
+		if(this.authType == AuthType.MD5Password){
+			PIOUtils.Send(this.salt, bf);
+		}
+		bf.flip();
+		return bf;		
+	}
+	
+	
 }
