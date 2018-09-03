@@ -125,6 +125,15 @@ public class PIOUtils {
 	public static void SendByte(byte b, ByteBuffer buffer) {
 		buffer.put(b);
 	}
+
+	
+	public static int bytesToInt(byte ...rno) {
+		int i= (rno[0]<<24)&0xff000000|
+			       (rno[1]<<16)&0x00ff0000|
+			       (rno[2]<< 8)&0x0000ff00|
+			       (rno[3]<< 0)&0x000000ff;
+		return i;
+	}
 	
 	
 
