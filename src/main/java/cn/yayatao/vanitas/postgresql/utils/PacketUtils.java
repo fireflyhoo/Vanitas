@@ -10,6 +10,7 @@ import java.util.TimeZone;
 import cn.yayatao.vanitas.postgresql.packet.AuthenticationPacket;
 import cn.yayatao.vanitas.postgresql.packet.BackendKeyData;
 import cn.yayatao.vanitas.postgresql.packet.Bind;
+import cn.yayatao.vanitas.postgresql.packet.Bind.DataParameter;
 import cn.yayatao.vanitas.postgresql.packet.CommandComplete;
 import cn.yayatao.vanitas.postgresql.packet.CopyInResponse;
 import cn.yayatao.vanitas.postgresql.packet.CopyOutResponse;
@@ -22,12 +23,11 @@ import cn.yayatao.vanitas.postgresql.packet.Parse;
 import cn.yayatao.vanitas.postgresql.packet.ParseComplete;
 import cn.yayatao.vanitas.postgresql.packet.PasswordMessage;
 import cn.yayatao.vanitas.postgresql.packet.PostgreSQLPacket;
+import cn.yayatao.vanitas.postgresql.packet.PostgreSQLPacket.DataProtocol;
+import cn.yayatao.vanitas.postgresql.packet.PostgreSQLPacket.DateType;
 import cn.yayatao.vanitas.postgresql.packet.ReadyForQuery;
 import cn.yayatao.vanitas.postgresql.packet.RowDescription;
 import cn.yayatao.vanitas.postgresql.packet.StartupMessage;
-import cn.yayatao.vanitas.postgresql.packet.Bind.DataParameter;
-import cn.yayatao.vanitas.postgresql.packet.PostgreSQLPacket.DataProtocol;
-import cn.yayatao.vanitas.postgresql.packet.PostgreSQLPacket.DateType;
 import cn.yayatao.vanitas.postgresql.packet.StartupMessage.ParamsItme;
 
 public class PacketUtils {
@@ -47,13 +47,21 @@ public class PacketUtils {
 		case 'P':
 			pgs.addAll(paersParsePkg(buffer, offset, readLength));
 			break;
-
+		
+		case 'E':
+			pgs.add(paersExecute(buffer,offset,readLength));
+		
 		default:
 			pgs.add(paersStartUp(buffer, offset, readLength));
 			break;
 		}
 
 		return pgs;
+	}
+
+	private static PostgreSQLPacket paersExecute(ByteBuffer buffer, int offset, int readLength) {
+		System.out.println(buffer);
+		return null;
 	}
 
 	/****************
@@ -143,6 +151,10 @@ public class PacketUtils {
 			bind.setResultProtocol(resultProtocol);
 			pgs.add(bind);
 
+		}
+		if(buffer.capacity()- _offset > 0){
+			char eMark =  PIOUtils.redChar1(buffer, _offset);
+			System.out.println(eMark);
 		}
 		return pgs;
 	}
@@ -250,6 +262,7 @@ public class PacketUtils {
 			case '1':
 				pg = ParseComplete.parse(bytes, offset);
 				break;
+			
 			default:
 				throw new RuntimeException("Unknown packet");
 			}

@@ -44,7 +44,7 @@ public class FrontConnection implements Closeable, IOConnection {
 
 	public FrontConnection(SocketChannel channel) {
 		this.channel = channel;
-		VanitasServer.getExecutor().execute(() ->{
+		VanitasServer.getExecutor().execute(() -> {
 			ioHander.onConnected(channel);
 		});
 	}
@@ -62,9 +62,12 @@ public class FrontConnection implements Closeable, IOConnection {
 		int position = readBuffer.position();
 		
 		readBuffer.flip();
+		
+		
+		
 		byte[] dst = new byte[length];
-		readBuffer.get(dst, position-length, length);
-//		System.out.println("读到数据长度:" + dst.length);
+		readBuffer.get(dst, position - length, length);
+		// System.out.println("读到数据长度:" + dst.length);
 		readBuffer.clear();
 		VanitasServer.getExecutor().execute(() -> {
 			ioHander.hander(ByteBuffer.wrap(dst), 0, this);
@@ -80,13 +83,9 @@ public class FrontConnection implements Closeable, IOConnection {
 	 * 通知select 当前有 写入事件
 	 */
 	private void doWakeupIoSelector() {
-		System.out.println("唤醒...///////////////");
-		if ((selectionKey.interestOps() & SelectionKey.OP_WRITE) > 0) {
-			System.err.print("当前的状态就是可写状态");
-		} else {
+		if (!((selectionKey.interestOps() & SelectionKey.OP_WRITE) > 0)) {
 			selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
-		} 
-		
+		}
 		selectionKey.selector().wakeup();// 写入数据要立刻唤醒.
 	}
 

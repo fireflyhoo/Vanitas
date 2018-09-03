@@ -261,6 +261,11 @@ public abstract class PostgreSQLPacket {
 		 * 解析sql语句请求
 		 */
 		F_Parse('P'),
+		
+		/**
+		 * 执行SQL语句
+		 */
+		F_Execute('E'),
 
 		/**
 		 * sql 解析成功

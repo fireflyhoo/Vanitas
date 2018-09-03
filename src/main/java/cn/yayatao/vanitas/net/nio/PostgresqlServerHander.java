@@ -4,7 +4,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.yayatao.vanitas.postgresql.packet.AuthenticationPacket;
+import cn.yayatao.vanitas.postgresql.packet.AuthenticationPacket.AuthType;
 import cn.yayatao.vanitas.postgresql.packet.Bind;
 import cn.yayatao.vanitas.postgresql.packet.BindComplete;
 import cn.yayatao.vanitas.postgresql.packet.CommandComplete;
@@ -14,12 +18,13 @@ import cn.yayatao.vanitas.postgresql.packet.ParseComplete;
 import cn.yayatao.vanitas.postgresql.packet.PasswordMessage;
 import cn.yayatao.vanitas.postgresql.packet.PostgreSQLPacket;
 import cn.yayatao.vanitas.postgresql.packet.ReadyForQuery;
-import cn.yayatao.vanitas.postgresql.packet.StartupMessage;
-import cn.yayatao.vanitas.postgresql.packet.AuthenticationPacket.AuthType;
 import cn.yayatao.vanitas.postgresql.packet.ReadyForQuery.TransactionState;
+import cn.yayatao.vanitas.postgresql.packet.StartupMessage;
 import cn.yayatao.vanitas.postgresql.utils.PacketUtils;
 
 public class PostgresqlServerHander implements IoHander {
+	
+	private final static Logger  LOGGER = LoggerFactory.getLogger(PostgresqlServerHander.class) ;
 
 	@Override
 	public void hander(ByteBuffer bf, int length, FrontConnection source) {
@@ -43,11 +48,13 @@ public class PostgresqlServerHander implements IoHander {
 					readyForQuery.setState(TransactionState.NOT_IN);
 					source.write(readyForQuery.writeBuffer());
 				}else if (packet instanceof Parse) {
+					LOGGER.debug("Parse sql:" + ((Parse) packet).getSql()); 
 					ParseComplete complete = new ParseComplete();
 					source.write(complete.writeBuffer());
 				}else if (packet instanceof Bind) {
 					
-					System.out.println("绑定参数");
+					LOGGER.debug("绑定参数",((Bind) packet).getParameter());
+					
 					BindComplete bindComplete = new BindComplete();
 					source.write(bindComplete.writeBuffer());
 					
@@ -56,8 +63,9 @@ public class PostgresqlServerHander implements IoHander {
 					
 					CommandComplete commandComplete = new CommandComplete();
 					commandComplete.setCommandResponse("SELECT 0");
-					source.write(commandComplete.writeBuffer()); 
-					
+					source.write(commandComplete.writeBuffer()); 					
+				}else{
+					System.out.println(packet);
 				}				
 			}
 		} catch (Exception e) {

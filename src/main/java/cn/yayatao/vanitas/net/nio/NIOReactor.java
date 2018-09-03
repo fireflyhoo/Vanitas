@@ -70,12 +70,12 @@ public class NIOReactor implements SocketIOReactor {
 						Object conn = key.attachment();
 						try {
 							if (key.isValid() && key.isReadable()) {
-								System.out.println("有读事件..."); 
+								LOGGER.debug("have Chand"); 
 								doRead(key);
 							}
 							if (key.isValid() && key.isWritable()) {
 								// 可写
-								System.out.println(key.channel() + "可写");
+								LOGGER.debug(key.channel() + "can writable");
 								doWrit(key);
 							}
 							keysIter.remove();
@@ -164,12 +164,12 @@ public class NIOReactor implements SocketIOReactor {
 	}
 
 	public void doWrit(SelectionKey key) {
-		System.err.println("进行写处理......"); 
+		LOGGER.debug("进行写处理......"); 
 		Object attachment  = key.attachment();
 		if(attachment instanceof IOConnection){
 			try {
 				((IOConnection) attachment).write0();
-				System.err.println("进行写处理完成......"); 
+				LOGGER.debug("进行写处理完成......"); 
 				if ((key.interestOps() & SelectionKey.OP_WRITE) != 0) {					
 					key.interestOps(key.interestOps() & (~SelectionKey.OP_WRITE));
 				}
@@ -178,9 +178,8 @@ public class NIOReactor implements SocketIOReactor {
 				if(attachment instanceof Closeable){
 					try {
 						((Closeable) attachment).close();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+					} catch (IOException exception) {
+						LOGGER.error("close  attachment error",exception); 
 					}
 				}
 			}

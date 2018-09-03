@@ -36,7 +36,7 @@ public class VanitasServer {
 
 		public static void main(String[] args) throws Exception {
 			SocketIOReactor ioReactor = new NIOReactor("NIO-Reactor-01");
-			SocketAcceptor acceptor = new NIOAcceptor("PostgreSQL-VanitasServer", 54320, ioReactor);
+			SocketAcceptor acceptor = new NIOAcceptor("PostgreSQL-VanitasServer", 3307, ioReactor);
 			acceptor.start();
 			ioReactor.start();
 			Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
