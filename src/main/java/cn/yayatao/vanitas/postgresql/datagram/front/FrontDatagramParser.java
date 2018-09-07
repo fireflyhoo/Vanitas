@@ -6,9 +6,23 @@ import cn.yayatao.vanitas.postgresql.DatagramFrames;
 import cn.yayatao.vanitas.postgresql.DatagramParser;
 import cn.yayatao.vanitas.postgresql.datagram.Datagram;
 import cn.yayatao.vanitas.postgresql.datagram.IBuilder;
+import cn.yayatao.vanitas.postgresql.datagram.front.analysis.AnalysisBindBuilder;
 import cn.yayatao.vanitas.postgresql.datagram.front.analysis.AnalysisCancelRequestBuilder;
+import cn.yayatao.vanitas.postgresql.datagram.front.analysis.AnalysisCloseBuilder;
+import cn.yayatao.vanitas.postgresql.datagram.front.analysis.AnalysisCopyFailBuilder;
+import cn.yayatao.vanitas.postgresql.datagram.front.analysis.AnalysisDescribeBuilder;
+import cn.yayatao.vanitas.postgresql.datagram.front.analysis.AnalysisExecuteBuilder;
+import cn.yayatao.vanitas.postgresql.datagram.front.analysis.AnalysisFlushBuilder;
+import cn.yayatao.vanitas.postgresql.datagram.front.analysis.AnalysisFunctionCallBuilder;
+import cn.yayatao.vanitas.postgresql.datagram.front.analysis.AnalysisParseBuilder;
+import cn.yayatao.vanitas.postgresql.datagram.front.analysis.AnalysisPasswordMessageBuilder;
+import cn.yayatao.vanitas.postgresql.datagram.front.analysis.AnalysisQueryBuilder;
 import cn.yayatao.vanitas.postgresql.datagram.front.analysis.AnalysisSSLRequestBuilder;
 import cn.yayatao.vanitas.postgresql.datagram.front.analysis.AnalysisStartupMessageBuilder;
+import cn.yayatao.vanitas.postgresql.datagram.front.analysis.AnalysisSyncBuilder;
+import cn.yayatao.vanitas.postgresql.datagram.front.analysis.AnalysisTerminateBuilder;
+import cn.yayatao.vanitas.postgresql.datagram.general.analysis.AnalysisCopyDataBuilder;
+import cn.yayatao.vanitas.postgresql.datagram.general.analysis.AnalysisCopyDoneBuilder;
 import cn.yayatao.vanitas.postgresql.utils.PIOUtils;
 
 /**
@@ -23,7 +37,76 @@ public class FrontDatagramParser implements DatagramParser {
 	private final static IBuilder analysisStartupMessageBuilder = new AnalysisStartupMessageBuilder();
 
 	private static enum FrontDatagramSign {
-		;
+		/**
+		 * 绑定参数包
+		 */
+		BIND('B', new AnalysisBindBuilder()),
+
+		/**
+		 * 关闭包
+		 */
+		CLOSE('C', new AnalysisCloseBuilder()),
+
+		/***
+		 * 拷贝数据
+		 */
+		COPY_DATA('d', new AnalysisCopyDataBuilder()),
+
+		/***
+		 * 拷贝完成
+		 */
+		COPY_DONE('c', new AnalysisCopyDoneBuilder()),
+
+		/*******
+		 * 拷贝出错
+		 */
+		COPY_FAIL('f', new AnalysisCopyFailBuilder()),
+
+		/**
+		 * 描述命令
+		 */
+		DESCRIBE('D', new AnalysisDescribeBuilder()),
+
+		/**
+		 * 执行命令
+		 */
+		EXECUTE('E', new AnalysisExecuteBuilder()),
+
+		/**
+		 * 完成命令包
+		 */
+		FLUSH('H', new AnalysisFlushBuilder()),
+
+		/**
+		 * 函数调用命令包
+		 */
+		FUNCTION_CALL('F', new AnalysisFunctionCallBuilder()),
+
+		/*********
+		 * 预编译SQL命令包
+		 */
+		PARSE('P', new AnalysisParseBuilder()),
+
+		/***
+		 * 密码命令包
+		 */
+		PASSWORD_MESSAGE('p', new AnalysisPasswordMessageBuilder()),
+
+		/***
+		 * 查询命令数据包
+		 */
+		QUERY('Q', new AnalysisQueryBuilder()),
+
+		/***
+		 * 同步命令
+		 */
+		SYNC('S', new AnalysisSyncBuilder()),
+
+		/***
+		 * 退出命令
+		 */
+		TERMINATE('X', new AnalysisTerminateBuilder());
+
 		private char mark;
 		private IBuilder builder;
 
@@ -66,8 +149,7 @@ public class FrontDatagramParser implements DatagramParser {
 			// StartupMessage
 			return analysisStartupMessageBuilder.build(frame);
 		}
-
-		return null;
+		throw new IllegalArgumentException("can't analysis this frame ," + frame);
 	}
 
 	@Override
