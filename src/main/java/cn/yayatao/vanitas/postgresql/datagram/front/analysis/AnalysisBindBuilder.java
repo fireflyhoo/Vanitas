@@ -8,7 +8,11 @@ import cn.yayatao.vanitas.postgresql.datagram.IBuilder;
 import cn.yayatao.vanitas.postgresql.datagram.front.Bind;
 import cn.yayatao.vanitas.postgresql.datagram.front.Bind.Argument;
 import cn.yayatao.vanitas.postgresql.utils.PIOUtils;
-
+/***
+ * 绑定参数包
+ * @author fireflyhoo
+ *
+ */
 public class AnalysisBindBuilder implements IBuilder {
 
 	@Override
@@ -16,7 +20,7 @@ public class AnalysisBindBuilder implements IBuilder {
 
 		Bind bind = new Bind();
 		ByteBuffer buffer = ByteBuffer.wrap(data);
-		bind.setMark((char)buffer.get());
+		bind.setMark((char) buffer.get());
 		bind.setLength(buffer.getInt());
 
 		try {
@@ -35,26 +39,26 @@ public class AnalysisBindBuilder implements IBuilder {
 			argumentTypes[i] = buffer.getShort();
 		}
 		bind.setArgumentTypes(argumentTypes);
-
+		bind.setArgumentsNubmer(buffer.getShort());
 		Argument[] arguments = new Argument[bind.getArgumentTypesNumber()];
 		for (int i = 0; i < arguments.length; i++) {
-			Argument argument  = new Argument();
+			Argument argument = new Argument();
 			argument.setLength(buffer.getInt());
 			byte[] _data = new byte[argument.getLength()];
 			buffer.get(_data);
 			argument.setData(_data);
-			arguments[i]=argument;			
-		}		
+			arguments[i] = argument;
+		}
 		bind.setArguments(arguments);
 
 		short returnFieldTypesNumber = buffer.getShort();
 		bind.setReturnFieldTypesNumber(returnFieldTypesNumber);
 		short[] returnFieldTypes = new short[returnFieldTypesNumber];
-		for(short i=0; i< returnFieldTypesNumber;i++){
+		for (short i = 0; i < returnFieldTypesNumber; i++) {
 			returnFieldTypes[i] = buffer.getShort();
 		}
 		bind.setReturnFieldTypes(returnFieldTypes);
-		if(buffer.hasRemaining()){
+		if (buffer.hasRemaining()) {
 			throw new IllegalArgumentException("this frame data is to long");
 		}
 		return bind;

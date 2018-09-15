@@ -10,6 +10,8 @@ import java.nio.charset.Charset;
  */
 public class ByteUtils {
 
+	private static final Charset UTF_8 = Charset.forName("utf-8");
+
 	/***
 	 * 短整型转成byte数组
 	 * 
@@ -48,7 +50,7 @@ public class ByteUtils {
 	 * @return
 	 */
 	public static byte[] stringToBytes(String x, boolean fillSpace) {
-		byte[] ret = x.getBytes(Charset.forName("utf-8"));
+		byte[] ret = x.getBytes(UTF_8);
 		if (fillSpace) {
 			byte[] out = new byte[ret.length + 1];
 			for (int i = 0; i < ret.length; i++) {
@@ -58,6 +60,13 @@ public class ByteUtils {
 			return out;
 		}
 		return ret;
+	}
+
+	public static int getStringLength(String x) {
+		if(x == null || x.isEmpty()){
+			return 1;
+		}
+		return x.getBytes(UTF_8).length+1;
 	}
 
 }
