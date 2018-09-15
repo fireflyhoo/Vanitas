@@ -159,7 +159,7 @@ public class FrontDatagramParser implements DatagramParser {
 		DatagramFrames datagramFrames = new DatagramFrames();
 
 		for (int i = 0; i < position - offset;) {
-			char mark = buffer.getChar(offset + i);
+			char mark = (char)buffer.get(offset + i);
 			FrontDatagramSign sign = FrontDatagramSign.valueOf(mark);
 			if (sign != null) {
 				// 正常包

@@ -111,6 +111,20 @@ public class PIOUtils {
 		}
 		return new String(out.toByteArray(),charset);
 	}
+	
+	
+	public static String redString(ByteBuffer buffer,Charset charset) throws IOException{
+		ByteArrayOutputStream out  =new ByteArrayOutputStream();
+		for(;buffer.hasRemaining();){
+			byte b = buffer.get();
+			if((char)b == '\0'){
+				break;
+			}			
+			out.write(new byte[]{(byte)b});
+		}
+		return new String(out.toByteArray(),charset);
+	}
+	
 
 	/**
 	 * 读取1byte数据
