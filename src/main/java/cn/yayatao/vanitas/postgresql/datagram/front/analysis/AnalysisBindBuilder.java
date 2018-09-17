@@ -5,8 +5,8 @@ import java.nio.ByteBuffer;
 
 import cn.yayatao.vanitas.postgresql.datagram.Datagram;
 import cn.yayatao.vanitas.postgresql.datagram.IBuilder;
+import cn.yayatao.vanitas.postgresql.datagram.front.Argument;
 import cn.yayatao.vanitas.postgresql.datagram.front.Bind;
-import cn.yayatao.vanitas.postgresql.datagram.front.Bind.Argument;
 import cn.yayatao.vanitas.postgresql.utils.PIOUtils;
 /***
  * 绑定参数包

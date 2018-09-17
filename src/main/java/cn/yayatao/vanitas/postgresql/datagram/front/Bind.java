@@ -43,7 +43,7 @@ import cn.yayatao.vanitas.postgresql.datagram.general.ByteUtils;
 //结果字段格式代码。目前每个必须是零(文本)或者一(二进制)。
 public class Bind implements IFrontDatagram {
 
-	private char mark;
+	private char mark = 'B';
 
 	private int length;
 
@@ -60,7 +60,7 @@ public class Bind implements IFrontDatagram {
 	 * 0: text format 1: binary format
 	 */
 	private short[] argumentTypes;
-	
+
 	/**
 	 * 参数个数
 	 */
@@ -75,27 +75,7 @@ public class Bind implements IFrontDatagram {
 	 */
 	private short[] returnFieldTypes;
 
-	public static class Argument {
-		private int length;
-		private byte[] data;
-
-		public int getLength() {
-			return length;
-		}
-
-		public void setLength(int length) {
-			this.length = length;
-		}
-
-		public byte[] getData() {
-			return data;
-		}
-
-		public void setData(byte[] data) {
-			this.data = data;
-		}
-
-	}
+	
 
 	public char getMark() {
 		return mark;
@@ -168,8 +148,7 @@ public class Bind implements IFrontDatagram {
 	public void setReturnFieldTypes(short[] returnFieldTypes) {
 		this.returnFieldTypes = returnFieldTypes;
 	}
-	
-	
+
 	public short getArgumentsNubmer() {
 		return argumentsNubmer;
 	}
@@ -188,18 +167,18 @@ public class Bind implements IFrontDatagram {
 		buffer.putInt(length);
 		buffer.put(ByteUtils.stringToBytes(targetName, true));
 		buffer.put(ByteUtils.stringToBytes(sourceName, true));
-		
+
 		buffer.putShort(argumentTypesNumber);
-		for(int i =0;i< argumentTypesNumber;i++){
+		for (int i = 0; i < argumentTypesNumber; i++) {
 			buffer.putShort(argumentTypes[i]);
 		}
 		buffer.putShort(argumentsNubmer);
-		for(int i=0;i< argumentsNubmer;i++){
+		for (int i = 0; i < argumentsNubmer; i++) {
 			buffer.putInt(arguments[i].length);
 			buffer.put(arguments[i].data);
 		}
 		buffer.putShort(returnFieldTypesNumber);
-		for(int i=0;i< returnFieldTypesNumber;i++){
+		for (int i = 0; i < returnFieldTypesNumber; i++) {
 			buffer.putShort(returnFieldTypes[i]);
 		}
 
@@ -216,8 +195,7 @@ public class Bind implements IFrontDatagram {
 		int currLength = 4 /* length */
 				+ ByteUtils.getStringLength(sourceName) + ByteUtils.getStringLength(targetName)
 				+ 2 /* argumentTypesNumber */
-				+ argumentTypesNumber * 2
-				+ 2 /*argumentsNubmer*/;
+				+ argumentTypesNumber * 2 + 2 /* argumentsNubmer */;
 
 		for (int i = 0; i < argumentsNubmer; i++) {
 			currLength = currLength + arguments[i].getLength() + 4;
@@ -227,5 +205,4 @@ public class Bind implements IFrontDatagram {
 		this.length = currLength;
 	}
 
-	
 }

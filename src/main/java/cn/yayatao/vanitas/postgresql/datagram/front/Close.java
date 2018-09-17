@@ -17,7 +17,7 @@ import cn.yayatao.vanitas.postgresql.datagram.general.ByteUtils;
 //		String
 //		一个要关闭的预备语句或者入口的名字(一个空字符串选择未命名的预备语句或者入口)。
 public class Close implements IFrontDatagram {
-	private char mark;
+	private char mark = 'C';
 
 	private int length;
 

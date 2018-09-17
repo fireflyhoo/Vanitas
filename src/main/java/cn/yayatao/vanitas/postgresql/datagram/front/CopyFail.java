@@ -14,7 +14,7 @@ import cn.yayatao.vanitas.postgresql.datagram.general.ByteUtils;
 //		String
 //		一个报告失败原因的错误信息。
 public class CopyFail implements IFrontDatagram {
-	private char mark;
+	private char mark = 'f';
 
 	private int length;
 
@@ -50,7 +50,7 @@ public class CopyFail implements IFrontDatagram {
 			reviseLength();
 		}
 		ByteBuffer buffer = ByteBuffer.allocate(size());
-		buffer.put((byte)mark);
+		buffer.put((byte) mark);
 		buffer.putInt(length);
 		buffer.put(ByteUtils.stringToBytes(failReason, true));
 		return buffer.array();

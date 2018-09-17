@@ -1,5 +1,7 @@
 package cn.yayatao.vanitas.postgresql.datagram.front;
 
+import java.nio.ByteBuffer;
+
 import cn.yayatao.vanitas.postgresql.datagram.general.ByteUtils;
 
 //		Execute (F)
@@ -15,12 +17,12 @@ import cn.yayatao.vanitas.postgresql.datagram.general.ByteUtils;
 //		Int32
 //		要返回的最大行数，如果入口包含返回行的查询(否则忽略)。 零标识"没有限制"。
 public class Execute implements IFrontDatagram {
-	private char mark;
+	private char mark = 'E';
 
 	private int length;
-	
+
 	private String name;
-	
+
 	private int maxReturnRowSize;
 
 	public char getMark() {
@@ -57,8 +59,15 @@ public class Execute implements IFrontDatagram {
 
 	@Override
 	public byte[] toByteArrays() {
-		// TODO Auto-generated method stub
-		return null;
+		if (this.length <= 0) {
+			reviseLength();
+		}
+		ByteBuffer buffer = ByteBuffer.allocate(size());
+		buffer.put((byte) mark);
+		buffer.putInt(length);
+		buffer.put(ByteUtils.stringToBytes(name, true));
+		buffer.putInt(maxReturnRowSize);
+		return buffer.array();
 	}
 
 	@Override
@@ -68,9 +77,8 @@ public class Execute implements IFrontDatagram {
 
 	@Override
 	public void reviseLength() {
-		int currLength = 4 /*lenth*/ 
-				    +ByteUtils.getStringLength(name)
-				    +4 /**/;	
+		int currLength = 4 /* lenth */
+				+ ByteUtils.getStringLength(name) + 4 /**/;
 	}
-	
+
 }

@@ -18,7 +18,7 @@ import cn.yayatao.vanitas.postgresql.datagram.general.ByteUtils;
 //		要描述的预备语句或者入口的名字(或者一个空字符串，就会选取未命名的预备语句或者入口)。
 public class Describe implements IFrontDatagram {
 
-	private char mark;
+	private char mark = 'D';
 
 	private int length;
 
