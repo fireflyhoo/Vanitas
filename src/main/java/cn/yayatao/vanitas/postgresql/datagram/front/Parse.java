@@ -1,5 +1,9 @@
 package cn.yayatao.vanitas.postgresql.datagram.front;
 
+import java.nio.ByteBuffer;
+
+import cn.yayatao.vanitas.postgresql.datagram.general.ByteUtils;
+
 //		Parse (F)
 //		Byte1('P')
 //		标识消息是一条 Parse 命令。
@@ -23,7 +27,7 @@ package cn.yayatao.vanitas.postgresql.datagram.front;
 
 
 public class Parse implements IFrontDatagram {
-	private char mark = 'E';
+	private char mark = 'P';
 
 	private int length;
 	
@@ -39,7 +43,7 @@ public class Parse implements IFrontDatagram {
 	/***
 	 * 声明参数数据类型的对象 ID 
 	 */
-	private int argumentTypeOids;
+	private int[] argumentTypeOids;
 
 	public char getMark() {
 		return mark;
@@ -81,30 +85,45 @@ public class Parse implements IFrontDatagram {
 		this.argumentTypeOidsNumber = argumentTypeOidsNumber;
 	}
 
-	public int getArgumentTypeOids() {
-		return argumentTypeOids;
-	}
-
-	public void setArgumentTypeOids(int argumentTypeOids) {
-		this.argumentTypeOids = argumentTypeOids;
-	}
-
+	
 	
 	@Override
 	public byte[] toByteArrays() {
-		// TODO Auto-generated method stub
-		return null;
+		if(length <=0){
+			reviseLength();
+		}
+		ByteBuffer buffer = ByteBuffer.allocate(size());
+		buffer.put((byte)mark);
+		buffer.putInt(length);
+		buffer.put(ByteUtils.stringToBytes(name, true));
+		buffer.put(ByteUtils.stringToBytes(sql, true));
+		buffer.putShort(argumentTypeOidsNumber);
+		for(int i=0;i< argumentTypeOidsNumber;i++){
+			buffer.putInt(argumentTypeOids[i]);
+		}
+		return buffer.array();
 	}
 
 	@Override
 	public int size() {
-		// TODO Auto-generated method stub
-		return 0;
+		return length+1;
 	}
 
 	@Override
 	public void reviseLength() {
-		// TODO Auto-generated method stub
-		
+		int currLength = 4/*length self*/
+				+ ByteUtils.getStringLength(name) 
+				+ ByteUtils.getStringLength(sql)
+				+ 2 /*argumentTypeOidsNumber*/
+				+ argumentTypeOidsNumber * 4;
+		this.length = currLength;
+	}
+
+	public int[] getArgumentTypeOids() {
+		return argumentTypeOids;
+	}
+
+	public void setArgumentTypeOids(int[] argumentTypeOids) {
+		this.argumentTypeOids = argumentTypeOids;
 	}
 }

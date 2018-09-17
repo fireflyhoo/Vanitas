@@ -79,6 +79,7 @@ public class Execute implements IFrontDatagram {
 	public void reviseLength() {
 		int currLength = 4 /* lenth */
 				+ ByteUtils.getStringLength(name) + 4 /**/;
+		this.length = currLength;
 	}
 
 }
