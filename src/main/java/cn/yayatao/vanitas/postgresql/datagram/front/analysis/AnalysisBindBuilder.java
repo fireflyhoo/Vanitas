@@ -34,7 +34,7 @@ public class AnalysisBindBuilder implements IBuilder {
 
 		bind.setArgumentTypesNumber(buffer.getShort());
 
-		short[] argumentTypes = new short[buffer.getShort()];
+		short[] argumentTypes = new short[bind.getArgumentTypesNumber()];
 		for (short i = 0; i < bind.getArgumentTypesNumber(); i++) {
 			argumentTypes[i] = buffer.getShort();
 		}
@@ -58,9 +58,6 @@ public class AnalysisBindBuilder implements IBuilder {
 			returnFieldTypes[i] = buffer.getShort();
 		}
 		bind.setReturnFieldTypes(returnFieldTypes);
-		if (buffer.hasRemaining()) {
-			throw new IllegalArgumentException("this frame data is to long");
-		}
 		return bind;
 	}
 

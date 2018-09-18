@@ -20,8 +20,9 @@ public class PostgreSQLJdbcTesing {
 			
 			
 			System.out.println(conn);
-			PreparedStatement ps = conn.prepareStatement("select * from user where name = ?");
+			PreparedStatement ps = conn.prepareStatement("select * from user where name = ? and age = ?");
 			ps.setString(1, "胡雅辉");
+			ps.setInt(2, 111);
 			
 			ResultSet req = ps.executeQuery();		
 			

@@ -153,21 +153,26 @@ public class FrontDatagramParser implements DatagramParser {
 	}
 
 	@Override
-	public DatagramFrames split(ByteBuffer buffer, int offset) {
-		buffer.flip();
-		int position = buffer.position();
+	public DatagramFrames split(ByteBuffer buffer, int _offset) {
+	//	buffer.flip();
+		int limit = buffer.limit();
 		DatagramFrames datagramFrames = new DatagramFrames();
 
-		for (int i = 0; i < position - offset;) {
-			char mark = (char)buffer.get(offset + i);
+		for (int i = 0; i < limit - _offset;) {
+			char mark = (char)buffer.get(_offset + i);
 			FrontDatagramSign sign = FrontDatagramSign.valueOf(mark);
 			if (sign != null) {
 				// 正常包
-				if (i + 4 + offset + 1 < position) {
-					int length = buffer.getInt(i + offset + 1);
-					if ((i + 4 + 1 + offset + length) < position) {// 完整数据包
-						byte[] frame = new byte[length + 1];
-						buffer.get(frame, i + offset, length + 1);
+				if (i + 4 + _offset + 1 <= limit) {
+					int length = buffer.getInt(i + _offset + 1);
+					if ((i  + _offset + 1 + length) <= limit) {// 完整数据包
+						byte[] frame = new byte[length + 1 + 1];
+						try {
+							buffer.position(i + _offset);
+							buffer.get(frame,0, length + 1);
+						} catch (Exception e) {
+							throw e;
+						}
 						datagramFrames.addFrame(frame);
 						i = i + length + 1;
 						// 进入下一个循环
@@ -176,25 +181,26 @@ public class FrontDatagramParser implements DatagramParser {
 				}
 			} else {
 				// 坑爹三剑客 CancelRequest (F) , SSLRequest (F), StartupMessage (F)
-				if (offset + i + 4 < position) {
-					int length = buffer.getInt(i + offset);
-					if ((offset + i + 4 + length) < position) {// 完整数据包
-						byte[] frame = new byte[length + 1];
-						buffer.get(frame, i + offset, length + 1);
+				if (_offset + i + 4 <= limit) {
+					int length = buffer.getInt(i + _offset);
+					if ((_offset + i + length) <= limit) {// 完整数据包
+						byte[] frame = new byte[length];
+						buffer.position(i + _offset);
+						buffer.get(frame, 0, length);
 						datagramFrames.addFrame(frame);
-						i = i + length + 1;
+						i = i + length;
 						// 进入下一个循环
 						continue;
 					}
 				}
 			}
 			// 异常包
-			byte[] offcut = new byte[position - (offset + i)];
-			buffer.get(offcut, offset + i, offcut.length);
+			byte[] offcut = new byte[limit - (_offset + i)];
+			buffer.position(_offset + i);
+			buffer.get(offcut, 0, offcut.length);
 			datagramFrames.setOffcut(offcut);
 			break;
 		}
 		return datagramFrames;
 	}
-
 }

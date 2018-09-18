@@ -28,7 +28,7 @@ public class FrontConnection implements Closeable, IOConnection {
 	 */
 	private SelectionKey selectionKey;
 
-	private IoHander ioHander = new PostgresqlServerHander();
+	private final IoHander ioHander = new PostgresqlServerHander();
 
 	public SelectionKey getSelectionKey() {
 		return selectionKey;
@@ -56,22 +56,26 @@ public class FrontConnection implements Closeable, IOConnection {
 	 */
 	public void asynchronousRead() throws Throwable {
 		if (readBuffer == null) {
-			readBuffer = ByteBuffer.allocate(1024 * 1024 * 2);// 默认读取 2MB 数据
+			readBuffer = ByteBuffer.allocate(1024 * 1024 * 1);// 默认读取 1MB 数据
 		}
-		int length = this.channel.read(readBuffer);
-		int position = readBuffer.position();
-		
-		readBuffer.flip();
-		
-		
-		
-		byte[] dst = new byte[length];
-		readBuffer.get(dst, position - length, length);
-		// System.out.println("读到数据长度:" + dst.length);
-		readBuffer.clear();
-		VanitasServer.getExecutor().execute(() -> {
-			ioHander.hander(ByteBuffer.wrap(dst), 0, this);
-		});
+		while(true){
+			int length = this.channel.read(readBuffer);
+			if(length > 0){
+				int position = readBuffer.position();			
+				readBuffer.flip();
+				
+				byte[] dst = new byte[length];
+				readBuffer.get(dst, position - length, length);
+				// System.out.println("读到数据长度:" + dst.length);
+				readBuffer.clear();
+				
+				VanitasServer.getExecutor().execute(() -> {
+					ioHander.hander(ByteBuffer.wrap(dst), 0, this);
+				});
+			}else{
+				return ;
+			}
+		}	
 	}
 
 	public void write(ByteBuffer buffer) {
@@ -111,7 +115,7 @@ public class FrontConnection implements Closeable, IOConnection {
 	@Override
 	public void write0() throws Throwable {
 		ByteBuffer v = null;
-		while ((v = writeQueue.poll()) != null) {
+		while ((v = writeQueue.poll()) != null) {			
 			while (0 < channel.write(v))
 				;
 		}
