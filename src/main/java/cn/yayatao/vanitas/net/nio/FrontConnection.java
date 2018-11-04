@@ -73,6 +73,9 @@ public class FrontConnection implements Closeable, IOConnection {
 					ioHander.hander(ByteBuffer.wrap(dst), 0, this);
 				});
 			}else{
+				if(length == -1){
+					throw new IOException("this channel is closed");
+				}
 				return ;
 			}
 		}	

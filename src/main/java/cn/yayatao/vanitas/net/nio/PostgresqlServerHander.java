@@ -3,30 +3,22 @@ package cn.yayatao.vanitas.net.nio;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.yayatao.vanitas.postgresql.DatagramFrames;
 import cn.yayatao.vanitas.postgresql.datagram.Datagram;
+import cn.yayatao.vanitas.postgresql.datagram.front.Execute;
 import cn.yayatao.vanitas.postgresql.datagram.front.FrontDatagramParser;
+import cn.yayatao.vanitas.postgresql.datagram.front.PasswordMessage;
+import cn.yayatao.vanitas.postgresql.datagram.front.StartupMessage;
 import cn.yayatao.vanitas.postgresql.datagram.front.Sync;
+import cn.yayatao.vanitas.postgresql.datagram.server.AuthenticationMD5Password;
+import cn.yayatao.vanitas.postgresql.datagram.server.AuthenticationOk;
+import cn.yayatao.vanitas.postgresql.datagram.server.EmptyQueryResponse;
 import cn.yayatao.vanitas.postgresql.datagram.server.ErrorResponse;
-import cn.yayatao.vanitas.postgresql.packet.AuthenticationPacket;
-import cn.yayatao.vanitas.postgresql.packet.AuthenticationPacket.AuthType;
-import cn.yayatao.vanitas.postgresql.packet.Bind;
-import cn.yayatao.vanitas.postgresql.packet.BindComplete;
-import cn.yayatao.vanitas.postgresql.packet.CommandComplete;
-import cn.yayatao.vanitas.postgresql.packet.EmptyQueryResponse;
-import cn.yayatao.vanitas.postgresql.packet.Parse;
-import cn.yayatao.vanitas.postgresql.packet.ParseComplete;
-import cn.yayatao.vanitas.postgresql.packet.PasswordMessage;
-import cn.yayatao.vanitas.postgresql.packet.PostgreSQLPacket;
-import cn.yayatao.vanitas.postgresql.packet.ReadyForQuery;
-import cn.yayatao.vanitas.postgresql.packet.ReadyForQuery.TransactionState;
-import cn.yayatao.vanitas.postgresql.packet.StartupMessage;
-import cn.yayatao.vanitas.postgresql.utils.PacketUtils;
+import cn.yayatao.vanitas.postgresql.datagram.server.ReadyForQuery;
 
 public class PostgresqlServerHander implements IoHander {
 
@@ -49,7 +41,7 @@ public class PostgresqlServerHander implements IoHander {
 			}
 			for (byte[] frame : frames.getFrames()) {
 				Datagram datagram = datagramParser.parse(frame);
-				System.out.println(datagram);
+				LOGGER.error("Datagram:{}",datagram);
 				doProcess(datagram,source); //每个包处理一个 
 			}
 		} catch (Exception e) {
@@ -58,77 +50,41 @@ public class PostgresqlServerHander implements IoHander {
 	}
 
 	private void doProcess(Datagram datagram,FrontConnection source) {
-		if(datagram instanceof cn.yayatao.vanitas.postgresql.datagram.front.StartupMessage){
-			AuthenticationPacket authe = new AuthenticationPacket();
-			authe.setSalt(new byte[] { 10, 15, 12, 11 }); // TODO 先写死
-			authe.setAuthType(AuthType.MD5Password);
-			source.write(authe.writeBuffer());
+		if(datagram instanceof StartupMessage){
+			AuthenticationMD5Password authenticationMD5Password = new AuthenticationMD5Password();
+			source.write(authenticationMD5Password.toByteArrays());
 		}
 		
-		if(datagram instanceof cn.yayatao.vanitas.postgresql.datagram.front.PasswordMessage){
-			AuthenticationPacket ok = new AuthenticationPacket();
-			ok.setAuthType(AuthType.Ok);
-			source.write(ok.writeBuffer());
+		if(datagram instanceof PasswordMessage){
+			AuthenticationOk ok = new AuthenticationOk();
+			source.write(ok.toByteArrays());
 			// 写入一个 ReadyForQuery 包, 完成认证
 
 			ReadyForQuery readyForQuery = new ReadyForQuery();
-			readyForQuery.setState(TransactionState.NOT_IN);
-			source.write(readyForQuery.writeBuffer());
+			readyForQuery.setState((byte) 'I');
+			
+			source.write(readyForQuery.toByteArrays());
+		}
+		
+		if(datagram instanceof Execute){
+			
+//			ErrorResponse errorResponse = new ErrorResponse();
+//			errorResponse.setErrReason("服务器心情不好");
+//			errorResponse.setCode((byte)'S');
+//			source.write(errorResponse.toByteArrays());
+			
+			
+			EmptyQueryResponse empty  = new EmptyQueryResponse();
+			source.write(empty.toByteArrays());
 		}
 		
 		if(datagram instanceof Sync){
-			BindComplete bindComplete = new BindComplete();
-			source.write(bindComplete.writeBuffer());
-			ErrorResponse err = new ErrorResponse();
-			ByteBuffer buf = ByteBuffer.wrap(err.toByteArrays());
-			source.write(buf);
+			ReadyForQuery readyForQuery = new ReadyForQuery();
+			readyForQuery.setMark((char)'I');
+			source.write(readyForQuery.toByteArrays());
 		}
-	}
-
-	public void old(FrontConnection source, ByteBuffer bf) {
-		try {
-			List<PostgreSQLPacket> pgs = PacketUtils.parseClientPacket(bf, 0, 1);
-			for (PostgreSQLPacket packet : pgs) {
-				if (packet instanceof StartupMessage) {
-					// 发送一个需要密码的包给前端.
-					AuthenticationPacket authe = new AuthenticationPacket();
-					authe.setSalt(new byte[] { 10, 15, 12, 11 }); // TODO 先写死
-					authe.setAuthType(AuthType.MD5Password);
-					source.write(authe.writeBuffer());
-				} else if (packet instanceof PasswordMessage) {
-					AuthenticationPacket ok = new AuthenticationPacket();
-					ok.setAuthType(AuthType.Ok);
-					source.write(ok.writeBuffer());
-					// 写入一个 ReadyForQuery 包, 完成认证
-
-					ReadyForQuery readyForQuery = new ReadyForQuery();
-					readyForQuery.setState(TransactionState.NOT_IN);
-					source.write(readyForQuery.writeBuffer());
-				} else if (packet instanceof Parse) {
-					LOGGER.debug("Parse sql:" + ((Parse) packet).getSql());
-					ParseComplete complete = new ParseComplete();
-					source.write(complete.writeBuffer());
-				} else if (packet instanceof Bind) {
-
-					LOGGER.debug("绑定参数", ((Bind) packet).getParameter());
-
-					BindComplete bindComplete = new BindComplete();
-					source.write(bindComplete.writeBuffer());
-
-					EmptyQueryResponse emp = new EmptyQueryResponse();
-					source.write(emp.writeBuffer());
-
-					CommandComplete commandComplete = new CommandComplete();
-					commandComplete.setCommandResponse("SELECT 0");
-					source.write(commandComplete.writeBuffer());
-				} else {
-					System.out.println(packet);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+		
+		
 	}
 
 	@Override

@@ -98,6 +98,10 @@ public class StartupMessage implements IFrontDatagram {
 	@Override
 	public void reviseLength() {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try {
+			fillDatagram(out);
+		} catch (IOException e) {
+		}
 		int _length = out.size();
 		this.length = _length;
 	}
