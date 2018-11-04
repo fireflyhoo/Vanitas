@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 //		以字节记的消息长度，包括长度本身。
 public class BindComplete implements IServerDatagram {
 
-	private char mark = 'R';
+	private char mark = '2';
 
 	private int length = 4;
 
