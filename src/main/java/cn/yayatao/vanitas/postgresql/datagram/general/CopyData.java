@@ -21,6 +21,8 @@ public class CopyData implements IServerDatagram, IFrontDatagram {
 	private int length;
 
 	private byte[] data;
+	
+	
 
 	@Override
 	public byte[] toByteArrays() {
@@ -42,6 +44,30 @@ public class CopyData implements IServerDatagram, IFrontDatagram {
 	@Override
 	public void reviseLength() {
 		this.length = data.length + 4/* length */;
+	}
+
+	public int getLength() {
+		return length;
+	}
+
+	public void setLength(int length) {
+		this.length = length;
+	}
+
+	public byte[] getData() {
+		return data;
+	}
+
+	public void setData(byte[] data) {
+		this.data = data;
+	}
+
+	public char getMark() {
+		return mark;
+	}
+
+	public void setMark(char mark) {
+		this.mark = mark;
 	}
 
 }

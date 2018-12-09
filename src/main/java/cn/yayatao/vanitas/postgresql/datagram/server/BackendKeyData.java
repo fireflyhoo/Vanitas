@@ -15,7 +15,7 @@ import java.nio.ByteBuffer;
 //		Int32
 //		此后端的密钥
 public class BackendKeyData implements IServerDatagram{
-	private char mark = 'R';
+	private char mark = 'K';
 	
 	private int length = 12;
 	
