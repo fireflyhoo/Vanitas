@@ -55,4 +55,12 @@ public class CommandComplete implements IServerDatagram {
 		this.length = ByteUtils.getStringLength(note) + 4;
 	}
 
+	public String getNote() {
+		return note;
+	}
+
+	public void setNote(String note) {
+		this.note = note;
+	}
+
 }

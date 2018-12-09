@@ -108,31 +108,31 @@ public class PostgresqlServerHander implements IoHander {
 			row.setColumns(columns);
 			row.setColumnsNumber((short)4);
 			source.write(row.toByteArrays());
-			
-			//数据
-//			DataRow dataRow = new DataRow();
-//			DataColumn[] colDatas = new DataColumn[4];
-//			for(int i =0;i< colDatas.length;i++){
-//				DataColumn column = new DataColumn();
-//				byte[] data = "xxxdsfewa".getBytes();
-//				column.setData(data);
-//				column.setLength(data.length);
-//				colDatas[i]= column;
-//			}
-//			dataRow.setColumns(colDatas);
-//			dataRow.setColumnsNumber((short)4);
-//			source.write(dataRow.toByteArrays());
-			
-//			
-//			//完成语句
+			for(int j=0;j<10;j++){
+				//数据
+				DataRow dataRow = new DataRow();
+				DataColumn[] colDatas = new DataColumn[4];
+				for(int i =0;i< colDatas.length;i++){
+					DataColumn column = new DataColumn();
+					byte[] data = ("xxxdsfewa"+j).getBytes();
+					column.setData(data);
+					column.setLength(data.length);
+					colDatas[i]= column;
+				}
+				dataRow.setColumns(colDatas);
+				dataRow.setColumnsNumber((short)4);
+				source.write(dataRow.toByteArrays());
+			}
+			//完成语句
 			CommandComplete  cmdComple = new CommandComplete();
+			cmdComple.setNote("FETCH "+4); //取到了4行
 			source.write(cmdComple.toByteArrays());
 		}
 		
 		if(datagram instanceof Sync){
 			ReadyForQuery readyForQuery = new ReadyForQuery();
-			readyForQuery.setMark((char)'I');
-			//source.write(readyForQuery.toByteArrays());
+			readyForQuery.setState((byte)'I');
+			source.write(readyForQuery.toByteArrays());
 		}
 	}
 

@@ -42,9 +42,7 @@ public class ReadyForQuery implements IServerDatagram {
 		return mark;
 	}
 
-	public void setMark(char mark) {
-		this.mark = mark;
-	}
+
 
 	public int getLength() {
 		return length;
