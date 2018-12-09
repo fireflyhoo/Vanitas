@@ -1,6 +1,5 @@
 package cn.yayatao.vanitas.postgresql.datagram.server;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 import cn.yayatao.vanitas.postgresql.datagram.general.ByteUtils;
@@ -39,7 +38,7 @@ import cn.yayatao.vanitas.postgresql.datagram.general.ByteUtils;
 //				用于该字段的格式码。目前会是零(文本)或者一(二进制)。从语句变种 Describe 返回的 RowDescription 里，格式码还是未知的，因此总是零。
 public class RowDescription implements IServerDatagram {
 
-	private char mark = 'R';
+	private char mark = 'T';
 
 	private int length;
 
@@ -84,10 +83,10 @@ public class RowDescription implements IServerDatagram {
 		private short typeLength;
 
 		// pg_attribute.atttypmod
-		private int attrTypeMod;
+		private int attrTypeMod = -1;
 
 		// 0: text format 1: binary format
-		private short columType;
+		private short columType = 0;
 
 		public String getName() {
 			return name;
@@ -190,6 +189,7 @@ public class RowDescription implements IServerDatagram {
 		buffer.putShort(columnsNumber);
 
 		for (ColumnDescription column : columns) {
+			
 			buffer.put(ByteUtils.stringToBytes(column.getName(), true));
 			buffer.putInt(column.getTableOid());
 			buffer.putShort(column.getColumnOid());

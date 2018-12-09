@@ -50,6 +50,9 @@ public class ByteUtils {
 	 * @return
 	 */
 	public static byte[] stringToBytes(String x, boolean fillSpace) {
+		if(x == null){
+			return new byte[]{'\0'};
+		}
 		byte[] ret = x.getBytes(UTF_8);
 		if (fillSpace) {
 			byte[] out = new byte[ret.length + 1];
