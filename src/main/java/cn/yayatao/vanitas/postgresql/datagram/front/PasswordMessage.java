@@ -1,8 +1,9 @@
 package cn.yayatao.vanitas.postgresql.datagram.front;
 
-import java.nio.ByteBuffer;
-
+import cn.yayatao.vanitas.postgresql.datagram.IFrontDatagram;
 import cn.yayatao.vanitas.postgresql.datagram.general.ByteUtils;
+
+import java.nio.ByteBuffer;
 
 //		
 //		PasswordMessage (F)

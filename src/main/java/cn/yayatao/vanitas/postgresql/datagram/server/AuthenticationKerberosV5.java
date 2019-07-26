@@ -1,5 +1,7 @@
 package cn.yayatao.vanitas.postgresql.datagram.server;
 
+import cn.yayatao.vanitas.postgresql.datagram.IServerDatagram;
+
 import java.nio.ByteBuffer;
 
 
@@ -12,7 +14,7 @@ import java.nio.ByteBuffer;
 //		
 //		Int32(2)
 //		声明需要 Kerberos V5 认证。
-public class AuthenticationKerberosV5 implements IServerDatagram{
+public class AuthenticationKerberosV5 implements IServerDatagram {
 	private char mark = 'R';
 
 	private int length = 8;

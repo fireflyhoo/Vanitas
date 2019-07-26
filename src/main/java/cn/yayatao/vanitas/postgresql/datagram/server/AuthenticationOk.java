@@ -1,5 +1,7 @@
 package cn.yayatao.vanitas.postgresql.datagram.server;
 
+import cn.yayatao.vanitas.postgresql.datagram.IServerDatagram;
+
 import java.nio.ByteBuffer;
 
 //			AuthenticationOk (B)

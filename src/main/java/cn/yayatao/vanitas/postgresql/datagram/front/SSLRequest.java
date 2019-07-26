@@ -3,6 +3,7 @@ package cn.yayatao.vanitas.postgresql.datagram.front;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import cn.yayatao.vanitas.postgresql.datagram.IFrontDatagram;
 import cn.yayatao.vanitas.postgresql.datagram.general.ByteUtils;
 
 //		SSLRequest (F)

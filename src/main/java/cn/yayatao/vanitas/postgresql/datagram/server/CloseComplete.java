@@ -1,5 +1,7 @@
 package cn.yayatao.vanitas.postgresql.datagram.server;
 
+import cn.yayatao.vanitas.postgresql.datagram.IServerDatagram;
+
 import java.nio.ByteBuffer;
 
 //		CloseComplete (B)
@@ -8,7 +10,7 @@ import java.nio.ByteBuffer;
 //		
 //		Int32(4)
 //		以字节记的消息内容的长度，包括长度本身。
-public class CloseComplete implements IServerDatagram{
+public class CloseComplete implements IServerDatagram {
 	private char mark = '3';
 
 	private int length = 4;

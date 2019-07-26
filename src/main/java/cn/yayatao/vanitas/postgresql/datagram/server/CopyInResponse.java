@@ -1,5 +1,7 @@
 package cn.yayatao.vanitas.postgresql.datagram.server;
 
+import cn.yayatao.vanitas.postgresql.datagram.IServerDatagram;
+
 import java.nio.ByteBuffer;
 
 //		
@@ -18,7 +20,7 @@ import java.nio.ByteBuffer;
 //		
 //		Int16[N]
 //		每个字段将要用的格式代码，目前每个都必须是零(文本)或者一(二进制)。如果全部拷贝格式都是文本的，那么所有的都必须是零。
-public class CopyInResponse implements IServerDatagram{
+public class CopyInResponse implements IServerDatagram {
 
 	private char mark = 'G';
 

@@ -2,8 +2,8 @@ package cn.yayatao.vanitas.postgresql.datagram.general;
 
 import java.nio.ByteBuffer;
 
-import cn.yayatao.vanitas.postgresql.datagram.front.IFrontDatagram;
-import cn.yayatao.vanitas.postgresql.datagram.server.IServerDatagram;
+import cn.yayatao.vanitas.postgresql.datagram.IFrontDatagram;
+import cn.yayatao.vanitas.postgresql.datagram.IServerDatagram;
 
 //		CopyDone (F & B)
 //		Byte1('c')

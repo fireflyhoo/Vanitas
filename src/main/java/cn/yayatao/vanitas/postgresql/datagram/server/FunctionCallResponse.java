@@ -1,5 +1,7 @@
 package cn.yayatao.vanitas.postgresql.datagram.server;
 
+import cn.yayatao.vanitas.postgresql.datagram.IServerDatagram;
+
 import java.nio.ByteBuffer;
 
 //		FunctionCallResponse (B)
@@ -14,7 +16,7 @@ import java.nio.ByteBuffer;
 //		
 //		Byten
 //		函数结果的值，格式是相关联的格式代码标识的。n 是上面的长度。
-public class FunctionCallResponse implements IServerDatagram{
+public class FunctionCallResponse implements IServerDatagram {
 	
 
 	private char mark = 'V';

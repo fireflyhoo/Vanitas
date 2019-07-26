@@ -1,5 +1,7 @@
 package cn.yayatao.vanitas.postgresql.datagram.server;
 
+import cn.yayatao.vanitas.postgresql.datagram.IServerDatagram;
+
 import java.nio.ByteBuffer;
 
 //AuthenticationCryptPassword (B)
@@ -15,7 +17,7 @@ import java.nio.ByteBuffer;
 //Byte2
 //加密口令使用的盐粒(salt)。
 
-public class AuthenticationCryptPassword  implements IServerDatagram{
+public class AuthenticationCryptPassword  implements IServerDatagram {
 	
 	private char mark = 'R';
 

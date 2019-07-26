@@ -1,5 +1,7 @@
 package cn.yayatao.vanitas.postgresql.datagram.server;
 
+import cn.yayatao.vanitas.postgresql.datagram.IServerDatagram;
+
 import java.nio.ByteBuffer;
 
 //		AuthenticationMD5Password (B)
@@ -14,7 +16,7 @@ import java.nio.ByteBuffer;
 //		
 //		Byte4
 //		加密口令的时候使用的盐粒。
-public class AuthenticationMD5Password implements IServerDatagram{
+public class AuthenticationMD5Password implements IServerDatagram {
 	
 	private char mark = 'R';
 	

@@ -2,6 +2,7 @@ package cn.yayatao.vanitas.postgresql.datagram.server;
 
 import java.nio.ByteBuffer;
 
+import cn.yayatao.vanitas.postgresql.datagram.IServerDatagram;
 import cn.yayatao.vanitas.postgresql.datagram.general.ByteUtils;
 
 //		NoticeResponse (B)
@@ -18,7 +19,7 @@ import cn.yayatao.vanitas.postgresql.datagram.general.ByteUtils;
 //		
 //		String
 //		字段值
-public class NoticeResponse implements IServerDatagram{
+public class NoticeResponse implements IServerDatagram {
 	
 	private char mark = 'N';
 

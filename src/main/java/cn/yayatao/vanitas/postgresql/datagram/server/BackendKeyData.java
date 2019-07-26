@@ -1,5 +1,7 @@
 package cn.yayatao.vanitas.postgresql.datagram.server;
 
+import cn.yayatao.vanitas.postgresql.datagram.IServerDatagram;
+
 import java.nio.ByteBuffer;
 
 //		BackendKeyData (B)
@@ -14,7 +16,7 @@ import java.nio.ByteBuffer;
 //		
 //		Int32
 //		此后端的密钥
-public class BackendKeyData implements IServerDatagram{
+public class BackendKeyData implements IServerDatagram {
 	private char mark = 'K';
 	
 	private int length = 12;

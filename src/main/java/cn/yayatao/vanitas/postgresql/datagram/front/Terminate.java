@@ -1,5 +1,7 @@
 package cn.yayatao.vanitas.postgresql.datagram.front;
 
+import cn.yayatao.vanitas.postgresql.datagram.IFrontDatagram;
+
 import java.nio.ByteBuffer;
 
 //		Terminate (F)
@@ -9,7 +11,7 @@ import java.nio.ByteBuffer;
 //		Int32(4)
 //		以字节计的消息内容长度，包括长度本身。
 
-public class Terminate implements IFrontDatagram{
+public class Terminate implements IFrontDatagram {
 	
 	private char mark = 'X';
 

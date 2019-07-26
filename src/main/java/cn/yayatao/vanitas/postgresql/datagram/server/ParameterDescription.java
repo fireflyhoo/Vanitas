@@ -1,5 +1,7 @@
 package cn.yayatao.vanitas.postgresql.datagram.server;
 
+import cn.yayatao.vanitas.postgresql.datagram.IServerDatagram;
+
 import java.nio.ByteBuffer;
 
 //		ParameterDescription (B)
@@ -16,7 +18,7 @@ import java.nio.ByteBuffer;
 //			
 //			Int32
 //			声明参数数据类型的对象 ID
-public class ParameterDescription implements IServerDatagram{
+public class ParameterDescription implements IServerDatagram {
 
 	private char mark = 't';
 

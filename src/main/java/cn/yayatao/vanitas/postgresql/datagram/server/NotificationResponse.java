@@ -2,6 +2,7 @@ package cn.yayatao.vanitas.postgresql.datagram.server;
 
 import java.nio.ByteBuffer;
 
+import cn.yayatao.vanitas.postgresql.datagram.IServerDatagram;
 import cn.yayatao.vanitas.postgresql.datagram.general.ByteUtils;
 
 //			NotificationResponse (B)
@@ -19,7 +20,7 @@ import cn.yayatao.vanitas.postgresql.datagram.general.ByteUtils;
 //			
 //			String
 //			从通知进程传递过来的额外的信息。目前，这个特性还未实现，因此这个字段总是一个空字符串。
-public class NotificationResponse implements IServerDatagram{
+public class NotificationResponse implements IServerDatagram {
 	
 	private char mark = 'A';
 

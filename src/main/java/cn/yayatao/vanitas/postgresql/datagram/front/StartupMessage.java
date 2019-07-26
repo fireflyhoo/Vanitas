@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 
+import cn.yayatao.vanitas.postgresql.datagram.IFrontDatagram;
 import cn.yayatao.vanitas.postgresql.datagram.general.ByteUtils;
 import cn.yayatao.vanitas.postgresql.datagram.general.ParamPart;
 

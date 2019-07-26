@@ -1,5 +1,7 @@
 package cn.yayatao.vanitas.postgresql.datagram.front;
 
+import cn.yayatao.vanitas.postgresql.datagram.IFrontDatagram;
+
 import java.nio.ByteBuffer;
 
 //		FunctionCall (F)
