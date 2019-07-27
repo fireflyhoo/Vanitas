@@ -6,10 +6,12 @@ This project contains PostgreSQL interaction protocol implement
 
 This project provides the following features:
 
-*[x] Login with username/password
-*[x] Execution of simple SQL Query
-*[ ] Execution of prepared statements with bindings 
-*[ ] Support text/binary result
+
+
+-[x] Login with username/password
+-[x] Execution of simple SQL Query
+-[ ] Execution of prepared statements with bindings 
+-[ ] Support text/binary result
 
 ## Usage
 ----
