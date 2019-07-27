@@ -12,6 +12,7 @@ This project provides the following features:
 - [x] Execution of simple SQL Query
 - [ ] Execution of prepared statements with bindings 
 - [ ] Support text/binary result
+- [ ] Support SSL/TLS connection
 
 ## Usage
 ----
